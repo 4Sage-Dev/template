@@ -1,4 +1,6 @@
 node_modules/
 sprite-factory/node_modules/
 sprite-factory/dist/
+sound-factory/node_modules/
+sound-factory/dist/
 .DS_Store

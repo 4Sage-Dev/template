@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sound Factory - 4SAGE</title>
+    <style>
+      :root {
+        --bg: #1a1a1a;
+        --panel: #252525;
+        --card: #333;
+        --border: #444;
+        --accent: #3498db;
+        --text: #eee;
+        --muted: #999;
+      }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #sound-list {
+        width: 400px;
+        background: var(--panel);
+        border-right: 2px solid var(--border);
+        overflow-y: auto;
+        padding: 1rem;
+        height: 100%;
+      }
+      .sound-item {
+        background: var(--card);
+        margin-bottom: 1rem;
+        padding: 12px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+      }
+      .sound-item:hover { border-color: var(--accent); }
+      .sound-item.active { border-color: var(--accent); background: #2a3a4a; }
+      .sound-name {
+        display: block;
+        font-weight: bold;
+        color: #aaa;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+      }
+      .sound-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .play-btn {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 0.8rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .play-btn:hover { background: #2980b9; }
+      .sound-meta {
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .sound-meta strong { color: #ccc; }
+
+      #waveform-view {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+      }
+      #waveform-container {
+        flex: 1;
+        background: #111;
+        border: 2px solid var(--border);
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+      }
+      #waveform-canvas {
+        width: 100%;
+        height: 100%;
+      }
+      #now-playing {
+        text-align: center;
+        padding: 0.5rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-style: italic;
+      }
+      h1 {
+        font-size: 1.1rem;
+        margin: 0 0 1rem 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+        font-weight: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sound-list">
+      <h1>Sound Library</h1>
+      <div id="items-container">
+        <!-- Sound entries are added here by the agent -->
+        <div class="sound-item" data-sound="example">
+          <span class="sound-name">example_beep</span>
+          <div class="sound-controls">
+            <button class="play-btn" onclick="playSound('example')">&#9654;</button>
+            <div class="sound-meta">
+              <strong>effect</strong> &middot; 0.5s &middot; 44.1kHz
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="waveform-view">
+      <h1>Waveform Preview</h1>
+      <div id="waveform-container">
+        <canvas id="waveform-canvas"></canvas>
+      </div>
+      <div id="now-playing">Click a sound to preview</div>
+    </div>
+
+    <script>
+      // Sound map — add new sounds here
+      const soundMap = {
+        example: '/sounds/example/sound.wav'
+      };
+
+      let currentAudio = null;
+      let animFrame = null;
+      const canvas = document.getElementById('waveform-canvas');
+      const ctx = canvas.getContext('2d');
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      function drawWaveform(buffer) {
+        const data = buffer.getChannelData(0);
+        const step = Math.ceil(data.length / canvas.width);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#3498db';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        const mid = canvas.height / 2;
+        for (let i = 0; i < canvas.width; i++) {
+          const idx = i * step;
+          const val = data[idx] || 0;
+          const y = mid + val * mid * 0.9;
+          if (i === 0) ctx.moveTo(i, y);
+          else ctx.lineTo(i, y);
+        }
+        ctx.stroke();
+      }
+
+      async function playSound(name) {
+        if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+        const path = soundMap[name];
+        if (!path) return;
+
+        // Highlight active
+        document.querySelectorAll('.sound-item').forEach(el => el.classList.remove('active'));
+        const item = document.querySelector(`[data-sound="${name}"]`);
+        if (item) item.classList.add('active');
+
+        document.getElementById('now-playing').textContent = `Playing: ${name}`;
+
+        try {
+          const response = await fetch(path);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+          drawWaveform(audioBuffer);
+
+          currentAudio = new Audio(path);
+          currentAudio.play();
+          currentAudio.onended = () => {
+            document.getElementById('now-playing').textContent = 'Click a sound to preview';
+          };
+        } catch (e) {
+          console.error('Playback failed:', e);
+          document.getElementById('now-playing').textContent = 'Error loading sound';
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -31,6 +31,12 @@ my-game/
     public/assets/        # Individual sprite assets
     src/preview.ts        # Asset registry
     dist/                 # Baked output (spritesheet.png + .json)
+  sound-factory/          # Sound Factory audio pipeline
+    player.html           # Live audio preview and playback
+    gen_master_manifest.py # Packages sounds into production manifest
+    public/sounds/        # Individual sound assets
+    src/preview.ts        # Audio registry
+    dist/                 # Packaged output (manifest.json)
   JOURNAL.md              # Session continuity log
   FRAMEWORK.md            # 4SAGE methodology reference
   CONTRIBUTING.md         # File conventions and naming rules
@@ -41,6 +47,7 @@ my-game/
 
 - **Game Builder** — Full design methodology (L0-L6). [Spec](https://4sage.dev/frameworks/game-builder/spec.md)
 - **Sprite Builder** — Asset creation pipeline. [Spec](https://4sage.dev/frameworks/sprite-builder/spec.md)
+- **Sound Factory** — Audio synthesis pipeline. [Spec](https://4sage.dev/frameworks/sound-factory/spec.md)
 
 ## License
 
