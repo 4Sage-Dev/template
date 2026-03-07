@@ -1,0 +1,4 @@
+node_modules/
+sprite-factory/node_modules/
+sprite-factory/dist/
+.DS_Store
