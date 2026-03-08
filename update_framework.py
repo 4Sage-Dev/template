@@ -65,6 +65,8 @@ FACTORY_UPDATES = {
         "update": [
             "player.html",
             "gen_master_manifest.py",
+            "import_audio.py",
+            "integrity_check.py",
             "package.json",
             "vite.config.ts",
             "tsconfig.json",
