@@ -97,11 +97,31 @@ structured information:
 These blocks are embedded in natural language narrative. The document reads
 as prose; the blocks provide machine-parseable precision where needed.
 
+## Specs and Tools Must Stay in Sync
+
+The `specs/` directory contains the framework specifications that LLMs fetch
+and follow. These specs describe the tools in `sprite-factory/` and
+`sound-factory/`. **When you modify a tool, you must update the corresponding
+spec. When you add a new tool, you must add it to the spec.**
+
+Before committing changes to tools or specs, run:
+
+```
+python verify_sync.py
+```
+
+This checks that every tool is referenced in its spec and every spec reference
+points to a tool that exists. Do not commit if the verifier reports issues.
+
+The specs are the source of truth for the website. After updating specs here,
+run `sync_specs.py` in the website repo (`4Sage-Dev/4sage.dev`) to deploy them.
+
 ## Git Workflow
 
 - `main` branch should always be consistent
 - Use descriptive commit messages
 - Commit related changes together
+- Run `python verify_sync.py` before committing tool or spec changes
 
 ## LLM-Specific Notes
 
