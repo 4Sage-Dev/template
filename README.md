@@ -49,6 +49,17 @@ my-game/
 - **Sprite Builder** — Asset creation pipeline. [Spec](https://4sage.dev/frameworks/sprite-builder/spec.md)
 - **Sound Factory** — Audio synthesis pipeline. [Spec](https://4sage.dev/frameworks/sound-factory/spec.md)
 
+## Updating Framework Tools
+
+If the template gets improvements (new scripts, bug fixes), update your project without touching your content:
+
+```
+python update_framework.py          # Preview what would change
+python update_framework.py --apply  # Apply updates
+```
+
+This updates framework scripts and configs only — your KDD decisions, assets, sounds, and journal are never modified.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
